@@ -1,9 +1,15 @@
 {
-    "name": "webflo/drupal-core-strict",
-    "description": "Locked Drupal core dependencies",
+    "name": "webflo/package-generator",
+    "description": "A small tool to generate composer packages.",
     "license": "GPL-2.0-or-later",
     "require": {
         "gitonomy/gitlib": "^1.0",
-        "composer/semver": "^1.2"
+        "composer/semver": "^1.2",
+        "consolidation/robo": "^1.2"
+    },
+    "autoload":{
+        "psr-4":{
+            "PackageGenerator\\":"src"
+        }
     }
 }

@@ -1,0 +1,9 @@
+packages:
+  webflo/drupal-core-require-dev:
+    source: https://git.drupal.org/project/drupal.git
+    target: https://github.com/webflo/drupal-core-require-dev.git
+    git:
+      author:
+        name: Florian Weber (via CircleCI)
+        email: florian@webflo.org
+    builder: \PackageGenerator\Custom\DrupalCoreRequireDevBuilder

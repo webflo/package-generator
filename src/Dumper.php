@@ -1,5 +1,7 @@
 <?php
 
+namespace PackageGenerator;
+
 use Gitonomy\Git\Reference\Branch;
 use Gitonomy\Git\Reference\Tag;
 use Gitonomy\Git\Repository;
@@ -7,7 +9,7 @@ use Gitonomy\Git\Repository;
 class Dumper {
 
   /**
-   * @var Gitonomy\Git\Reference\Tag|Gitonomy\Git\Reference\Branch
+   * @var \Gitonomy\Git\Reference\Tag|\Gitonomy\Git\Reference\Branch
    */
   protected $reference;
 
@@ -15,13 +17,21 @@ class Dumper {
 
   protected $repository;
 
+  /**
+   * @var Branch
+   */
   protected $branch;
 
+  /**
+   * @var Tag
+   */
   protected $tag;
 
   protected $name;
 
-  public function __construct(Gitonomy\Git\Reference $reference, array $package, Repository $repository) {
+  protected $commitMessage;
+
+  public function __construct(\Gitonomy\Git\Reference $reference, array $package, Repository $repository, $commitMessage) {
     if ($reference instanceof Tag || $reference instanceof Branch) {
       $this->reference = $reference;
     }
@@ -31,9 +41,10 @@ class Dumper {
 
     $this->package = $package;
     $this->repository = $repository;
+    $this->commitMessage = $commitMessage;
   }
 
-  protected function getBranch(Gitonomy\Git\Reference $reference) {
+  protected function getBranch(\Gitonomy\Git\Reference $reference) {
     if ($reference instanceof Branch) {
       $this->branch = str_replace('origin/', '', $reference->getName());
       $this->tag = NULL;
@@ -51,7 +62,12 @@ class Dumper {
     $this->getBranch($this->reference);
     $wc = $this->repository->getWorkingCopy();
     if (!$this->repository->getReferences()->hasRemoteBranch('origin/' . $this->branch)) {
-      $this->repository->run('checkout', ['--orphan', $this->branch]);
+      if ($this->repository->getReferences()->hasBranch($this->branch)) {
+        $this->repository->run('checkout', [$this->branch]);
+      }
+      else {
+        $this->repository->run('checkout', ['--orphan', $this->branch]);
+      }
       $this->repository->run('rm', ['--cached', '-r', '-f', '.']);
     }
     else {
@@ -67,19 +83,12 @@ class Dumper {
     $this->repository->run('add', ['composer.json']);
 
     if (isset($this->tag)) {
-      $this->repository->run('commit', ['--allow-empty', '-m', $this->commitMessage()]);
+      $this->repository->run('commit', ['--allow-empty', '-m', $this->commitMessage]);
       $this->repository->run('tag', [$this->tag->getName()]);
     }
     elseif (!empty($wc->getDiffStaged()->getFiles())) {
-      $this->repository->run('commit', ['-m', $this->commitMessage()]);
+      $this->repository->run('commit', ['-m', $this->commitMessage]);
     }
-  }
-
-  protected function commitMessage() {
-    $msg[] = "Update composer.json ({$this->name})";
-    $msg[] = '';
-    $msg[] = 'Reference: http://cgit.drupalcode.org/drupal/commit/?id=' . $this->reference->getCommitHash();
-    return implode("\n", $msg);
   }
 
 }
