@@ -38,14 +38,18 @@ class RoboFile extends Tasks
   protected function buildPackage($config)
   {
     $collection = $this->collectionBuilder();
-    $source = $collection->tmpDir();
-    $target = $collection->tmpDir();
+    $source = 'tmp/' . hash('sha256', $config['source']);
+    $target = 'tmp/' . hash('sha256', $config['target']);
 
-    $collection->taskGitStack()
-      ->cloneRepo($config['source'], $source);
+    if (!file_exists($source)) {
+      $collection->taskGitStack()
+        ->cloneRepo($config['source'], $source);
+    }
 
-    $collection->taskGitStack()
-      ->cloneRepo($config['target'], $target);
+    if (!file_exists($target)) {
+      $collection->taskGitStack()
+        ->cloneRepo($config['target'], $target);
+    }
 
     $collection->addCode(function () use ($source, $target, $config) {
       /**
