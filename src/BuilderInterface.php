@@ -3,10 +3,11 @@
 namespace PackageGenerator;
 
 use Gitonomy\Git\Reference;
+use Gitonomy\Git\Repository;
 
 interface BuilderInterface {
 
-  public function __construct(array $composerJson, array $composerLock, Reference $gitObject);
+  public function __construct(array $composerJson, array $composerLock, Reference $gitObject, array $config, Repository $metapackage_repository);
 
   /**
    * @return string

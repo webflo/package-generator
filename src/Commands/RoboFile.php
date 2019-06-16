@@ -112,8 +112,8 @@ class RoboFile extends Tasks
         $metapackage_repository->run('config', ['user.email', $config['git']['author']['email']]);
 
         /** @var BuilderInterface $builder */
-        $builder = new $config['builder']($composerJsonData, $composerLockData, $ref);
-        $dump = new Dumper($ref, $builder->getPackage(), $metapackage_repository, $builder->getCommitMessage());
+        $builder = new $config['builder']($composerJsonData, $composerLockData, $ref, $config, $metapackage_repository);
+        $dump = new Dumper($ref, $builder, $metapackage_repository);
         $dump->write();
       }
     });
