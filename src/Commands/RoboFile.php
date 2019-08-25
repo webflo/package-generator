@@ -18,6 +18,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class RoboFile extends Tasks
 {
+  protected $clonedList = [];
 
   /**
    * @return \Robo\Collection\CollectionBuilder
@@ -41,12 +42,18 @@ class RoboFile extends Tasks
     $source = 'tmp/' . hash('sha256', $config['source']);
     $target = 'tmp/' . hash('sha256', $config['target']);
 
-    if (!file_exists($source)) {
+    $collection->progressMessage("Source is $source");
+
+    if (!file_exists($source) && !array_key_exists($source, $this->clonedList)) {
+      $this->clonedList[$source] = true;
       $collection->taskGitStack()
         ->cloneRepo($config['source'], $source);
     }
 
-    if (!file_exists($target)) {
+    $collection->progressMessage("Target is $target");
+
+    if (!file_exists($target) && !array_key_exists($target, $this->clonedList)) {
+      $this->clonedList[$target] = true;
       $collection->taskGitStack()
         ->cloneRepo($config['target'], $target);
     }
@@ -118,7 +125,7 @@ class RoboFile extends Tasks
       }
     });
 
-    $collection->progressMessage($target);
+    $collection->progressMessage("Done with $target");
 
     $collection->taskGitStack()
       ->dir($target)
